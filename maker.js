@@ -12,13 +12,23 @@ async function fetchList(input){
     switch (input.site) {
         case "myanimelist":
         console.log(input);
-        const user = await mal.findUser(input.name).catch(err => console.error(err));
+        let user = await mal.findUser(input.name).catch(err => console.error(err));
         await sleep(10000);
+        while (!user) {
+            console.log('try again');
+            user = await mal.findUser(input.name).catch(err => console.error(err));
+            await sleep(10000);
+        }
         for (let i = 0; i < Math.ceil(user.anime_stats.total_entries/300); i++) {
             console.log(i+1);
-            const fetch = await mal.findUser(input.name, 'animelist', 'all/'+(i+1)).catch(err => console.error(err));
-            console.log(fetch);
+            let fetch = await mal.findUser(input.name, 'animelist', 'all/'+(i+1)).catch(err => console.error(err));
             await sleep(10000);
+            while (!fetch) {
+                console.log('try again');
+                fetch = await mal.findUser(input.name, 'animelist', 'all/'+(i+1)).catch(err => console.error(err));
+                await sleep(10000);
+            }
+            console.log(fetch);
             for (const anime of fetch.anime) {
                 if(![1,2,3].includes(anime.watching_status)) continue;
                 const match = main.myanimelist.anime.find((element) => {
